@@ -14,6 +14,8 @@
 #define JOYSTICK_Y_PIN 27  // ADC1
 #define JOYSTICK_BUTTON_PIN 22
 #define DEBOUNCE_DELAY_MS 200
+#define BOTTON_RESET_PIN 5
+// #define BUZZER_PIN 6 // Sinalizar que ganhou, perdeu ou empatou com efeitos sonoros
 
 // Estrutura para representar uma posição no tabuleiro
 typedef struct {
@@ -29,8 +31,8 @@ const Position ledMap[3][3] = {
 };
 
 // Cores melhoradas
-const uint32_t COLOR_GRID = WS2812::RGB(5, 5, 0);
-const uint32_t COLOR_CURSOR = WS2812::RGB(0, 30, 0);
+const uint32_t COLOR_GRID = WS2812::RGB(2, 2, 0);
+const uint32_t COLOR_CURSOR = WS2812::RGB(0, 0, 30);
 const uint32_t COLOR_PLAYER1 = WS2812::RGB(30, 0, 0);
 const uint32_t COLOR_PLAYER2 = WS2812::RGB(0, 0, 30);
 const uint32_t COLOR_WIN = WS2812::RGB(0, 30, 0);
@@ -72,6 +74,11 @@ void initHardware() {
     gpio_init(JOYSTICK_BUTTON_PIN);
     gpio_set_dir(JOYSTICK_BUTTON_PIN, GPIO_IN);
     gpio_pull_up(JOYSTICK_BUTTON_PIN);
+
+    // Inicializa botão de reset
+    gpio_init(BOTTON_RESET_PIN);
+    gpio_set_dir(BOTTON_RESET_PIN, GPIO_IN);
+    gpio_pull_up(BOTTON_RESET_PIN);
     
     // Inicializa gerador de números aleatórios
     srand(to_ms_since_boot(get_absolute_time()));
@@ -158,10 +165,20 @@ void drawBoard(WS2812& ledStrip) {
 void processInput(WS2812& ledStrip) {
     static uint32_t lastMoveTime = 0;
     static bool lastButtonState = false;
+    static bool lastResetState = false;
     
     // Lê joystick
     int dx = 0, dy = 0;
     bool buttonPressed = !gpio_get(JOYSTICK_BUTTON_PIN);
+
+    // Lê botão de reset
+    bool resetPressed = !gpio_get(BOTTON_RESET_PIN);
+
+    // Reinicia o jogo se o botão de reset for pressionado
+    if (resetPressed && !lastResetState) {
+        resetGame(ledStrip);
+    }
+    lastResetState = resetPressed;
     
     // Lê eixos apenas se o jogo estiver ativo
     if (gameActive) {
@@ -230,7 +247,7 @@ void makeAIMove() {
     }
     
     // Estratégias de abertura
-    bool isFirstMove = true;
+    /*bool isFirstMove = true;
     for (uint8_t y = 0; y < 3; y++) {
         for (uint8_t x = 0; x < 3; x++) {
             if (board[y][x] != 0) {
@@ -256,7 +273,32 @@ void makeAIMove() {
     
     // Usa Minimax para outras situações
     Position bestMove = findBestMove();
-    board[bestMove.y][bestMove.x] = 1;
+    board[bestMove.y][bestMove.x] = 1;*/
+
+    // Primeiro conta quantas posições estão vazias
+    uint8_t emptySpots = 0;
+    for (uint8_t y = 0; y < 3; y++) {
+        for (uint8_t x = 0; x < 3; x++) {
+            if (board[y][x] == 0) emptySpots++;
+        }
+    }
+
+    // Escolhe um índice aleatório
+    uint8_t randomChoice = rand() % emptySpots;
+    uint8_t count = 0;
+
+    // Encontra a posição correspondente ao índice escolhido
+    for (uint8_t y = 0; y < 3; y++) {
+        for (uint8_t x = 0; x < 3; x++) {
+            if (board[y][x] == 0) {
+                if (count == randomChoice) {
+                    board[y][x] = 1;
+                    return;
+                }
+                count++;
+            }
+        }
+    }
 }
 
 // Implementação do Minimax com poda alfa-beta
@@ -348,7 +390,7 @@ void resetGame(WS2812& ledStrip) {
     gameActive = true;
     
     // Faz a primeira jogada da IA
-    makeAIMove();
+    // makeAIMove();
     drawBoard(ledStrip);
 }
 

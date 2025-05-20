@@ -28,50 +28,52 @@ set(PICO_BOARD pico_w CACHE STRING "Board type")
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
 
-project(bbb C CXX ASM)
+project(Educational_Games C CXX ASM)
 
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(bbb
-    # bbb.c
-    bbb.cpp
+add_executable(Educational_Games
+    main.cpp
     WS2812.cpp
-    )
+    TicTacToeMic.cpp
+    TicTacToe.cpp
+)
 
 # pull in common dependencies
-target_link_libraries(bbb 
+target_link_libraries(Educational_Games 
     pico_stdlib
     hardware_pio
     hardware_adc
-    )
+)
 
 if (PICO_CYW43_SUPPORTED)
-    target_link_libraries(bbb pico_cyw43_arch_none)
+    target_link_libraries(Educational_Games pico_cyw43_arch_none)
 endif()
 
+
 # create map/bin/hex file etc.
-pico_add_extra_outputs(bbb)
+# pico_add_extra_outputs(Educational_Games)
 
 # add url via pico_set_program_url
-pico_generate_pio_header(bbb ${CMAKE_CURRENT_LIST_DIR}/WS2812.pio)
+pico_generate_pio_header(Educational_Games ${CMAKE_CURRENT_LIST_DIR}/WS2812.pio)
 
-pico_set_program_name(bbb "WS2812 Example")
-pico_set_program_version(bbb "1.0")
+pico_set_program_name(Educational_Games "WS2812 Example")
+pico_set_program_version(Educational_Games "1.0")
 
-pico_enable_stdio_uart(bbb 1)
-pico_enable_stdio_usb(bbb 1)
+pico_enable_stdio_uart(Educational_Games 1)
+pico_enable_stdio_usb(Educational_Games 1)
 
 # Add the standard library to the build
-#target_link_libraries(bbb 
+#target_link_libraries(Educational_Games 
  #       pico_stdlib
 #)
 
 # Add any user requested libraries
-#target_link_libraries(bbb
+#target_link_libraries(Educational_Games
  #       hardware_pio
 #)
 
-pico_add_extra_outputs(bbb)
+pico_add_extra_outputs(Educational_Games)
