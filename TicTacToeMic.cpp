@@ -18,9 +18,9 @@
 #define ADC_VREF 3.3
 #define ADC_RANGE (1 << 12)
 #define ADC_CONVERT (ADC_VREF / (ADC_RANGE - 1))
-#define THRESHOLD_VOLTS 0.3f
+#define THRESHOLD_VOLTS 1.5f
 #define ANALISE_JANELA_MS 1000
-#define BATIDA_TIMEOUT_MS 80
+#define BATIDA_TIMEOUT_MS 20
 #define MIC_PIN 28
 
 const Position ledMap[3][3] = {
